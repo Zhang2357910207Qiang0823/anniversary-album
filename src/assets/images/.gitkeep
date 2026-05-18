@@ -1,0 +1,8 @@
+# 自定义图片文件夹
+
+将你的照片放入此文件夹。
+
+使用方法：
+1. 将图片文件放入 `src/assets/images/` 目录
+2. 在 App.vue 中使用相对路径引用，例如：
+   `{ year: 2025, url: '/src/assets/images/photo1.jpg', title: '照片1' }`
