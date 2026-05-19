@@ -447,7 +447,7 @@ onUnmounted(() => {
         </svg>
       </div>
       <button class="start-button" @click="startExperience">
-        <span>踏入星河</span>
+        <span>进来看看吧</span>
       </button>
     </div>
   </div>
