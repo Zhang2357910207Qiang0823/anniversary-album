@@ -20,7 +20,7 @@ const startExperience = () => {
   // 在进入开场动画前创建音频并立即尝试播放
   if (!audio.value) {
     audio.value = new Audio()
-    audio.value.src = '/music/background.mp3'
+    audio.value.src = import.meta.env.BASE_URL + 'music/background.mp3'
     audio.value.loop = true
     audio.value.volume = 0.6
     audio.value.play().catch(() => {})
