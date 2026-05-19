@@ -20,9 +20,11 @@ const isAudioLoaded = ref(false)
 const preloadAudio = () => {
   if (!audio.value) {
     audio.value = new Audio()
-    audio.value.src = import.meta.env.BASE_URL + 'music/background.mp3'
+    // 添加时间戳避免缓存问题
+    const cacheBust = '?t=' + Date.now()
+    audio.value.src = import.meta.env.BASE_URL + 'music/background.mp3' + cacheBust
     audio.value.loop = true
-    audio.value.volume = 0.6
+    audio.value.volume = 0
     audio.value.preload = 'auto'
     // 监听加载完成
     audio.value.addEventListener('canplay', () => {
@@ -88,56 +90,60 @@ const onMusicReady = (audioElement) => {
 }
 
 // 音乐控制（仅控制音乐，不影响图片播放）
+let fadeIntervalId = null
 const toggleMusic = () => {
   if (isMusicPlaying.value) {
     // 暂停音乐 - 使用淡出效果
     if (audio.value) {
-      fadeOutPause(audio.value, 1500)
+      fadeOutPause(audio.value, 1000)
     }
   } else {
     // 播放音乐 - 使用淡入效果
     if (audio.value) {
-      fadeInPlay(audio.value, 2000)
+      fadeInPlay(audio.value, 1000)
     }
   }
   isMusicPlaying.value = !isMusicPlaying.value
 }
 
-// 淡入播放
-const fadeInPlay = (audioEl, duration = 2000) => {
+// 淡入播放 - 使用 setInterval 减少性能消耗
+const fadeInPlay = (audioEl, duration = 1000) => {
+  audioEl.volume = 0
   audioEl.play().then(() => {
     const startTime = Date.now()
-    const fade = () => {
+    const targetVolume = 0.6
+    fadeIntervalId && clearInterval(fadeIntervalId)
+    fadeIntervalId = setInterval(() => {
       const elapsed = Date.now() - startTime
       const progress = Math.min(elapsed / duration, 1)
       const eased = 1 - Math.pow(1 - progress, 3)
-      audioEl.volume = eased * 0.6
-      if (progress < 1) {
-        requestAnimationFrame(fade)
+      audioEl.volume = eased * targetVolume
+      if (progress >= 1) {
+        clearInterval(fadeIntervalId)
+        fadeIntervalId = null
       }
-    }
-    requestAnimationFrame(fade)
+    }, 50)
   }).catch(e => {
     console.warn('音频播放失败:', e)
   })
 }
 
-// 淡出暂停
-const fadeOutPause = (audioEl, duration = 1500) => {
-  const startTime = Date.now()
+// 淡出暂停 - 使用 setInterval 减少性能消耗
+const fadeOutPause = (audioEl, duration = 1000) => {
   const startVolume = audioEl.volume
-  const fade = () => {
+  const startTime = Date.now()
+  fadeIntervalId && clearInterval(fadeIntervalId)
+  fadeIntervalId = setInterval(() => {
     const elapsed = Date.now() - startTime
     const progress = Math.min(elapsed / duration, 1)
     const eased = Math.pow(1 - progress, 2)
     audioEl.volume = startVolume * eased
-    if (progress < 1) {
-      requestAnimationFrame(fade)
-    } else {
+    if (progress >= 1) {
+      clearInterval(fadeIntervalId)
+      fadeIntervalId = null
       audioEl.pause()
     }
-  }
-  requestAnimationFrame(fade)
+  }, 50)
 }
 
 // 照片数据 - 按年份分类
