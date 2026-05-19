@@ -14,20 +14,36 @@ const introRef = ref(null)
 // 音乐控制
 const isMusicPlaying = ref(true)  // 默认开启音乐
 const audio = ref(null)
+const isAudioLoaded = ref(false)
 
-// 开始按钮点击
-const startExperience = () => {
-  // 在进入开场动画前创建音频并立即尝试播放
+// 在欢迎页面时预加载音频
+const preloadAudio = () => {
   if (!audio.value) {
     audio.value = new Audio()
     audio.value.src = import.meta.env.BASE_URL + 'music/background.mp3'
     audio.value.loop = true
     audio.value.volume = 0.6
+    audio.value.preload = 'auto'
+    // 监听加载完成
+    audio.value.addEventListener('canplay', () => {
+      isAudioLoaded.value = true
+    })
+  }
+}
+
+// 开始按钮点击
+const startExperience = () => {
+  if (audio.value && isAudioLoaded.value) {
     audio.value.play().catch(() => {})
   }
   showWelcome.value = false
   showIntro.value = true
 }
+
+onMounted(() => {
+  // 页面加载时就开始预加载音频
+  preloadAudio()
+})
 
 // 生成星星样式
 const getStarStyle = (i) => {
