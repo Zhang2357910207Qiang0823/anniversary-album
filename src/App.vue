@@ -436,7 +436,7 @@ onUnmounted(() => {
           <circle cx="50" cy="50" r="45" stroke="url(#starGrad)" stroke-width="1" opacity="0.4"/>
           <circle cx="50" cy="50" r="35" stroke="url(#starGrad)" stroke-width="0.8" opacity="0.5"/>
           <circle cx="50" cy="50" r="25" stroke="url(#starGrad)" stroke-width="0.5" opacity="0.6"/>
-          <path d="M50 12 L53 42 L83 50 L53 58 L50 88 L47 58 L17 50 L47 42 Z" fill="url(#starGrad)" opacity="0.85"/>
+          <path d="M50 12 L59 34 L83 31 L68 50 L83 69 L59 66 L50 88 L41 66 L17 69 L32 50 L17 31 L41 34 Z" fill="url(#starGrad)" opacity="0.5"/>
           <circle cx="50" cy="50" r="5" fill="#fff" opacity="0.95"/>
           <defs>
             <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
