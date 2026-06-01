@@ -456,6 +456,19 @@ onUnmounted(() => {
   <div class="main-container">
     <!-- 相册主体（始终渲染，用 opacity 控制） -->
     <div class="album-container" :class="{ 'album-visible': showAlbum }">
+      <!-- 漂浮光斑 -->
+      <div class="album-floating-orbs">
+        <div class="album-orb album-orb-1"></div>
+        <div class="album-orb album-orb-2"></div>
+        <div class="album-orb album-orb-3"></div>
+        <div class="album-orb album-orb-4"></div>
+        <div class="album-orb album-orb-5"></div>
+        <div class="album-orb album-orb-6"></div>
+      </div>
+      <!-- 星星粒子 -->
+      <div class="album-stars">
+        <div v-for="i in 80" :key="'as'+i" class="album-star" :style="getStarStyle(i)"></div>
+      </div>
       <!-- 主显示区域 -->
       <div
       class="photo-display"
@@ -764,6 +777,25 @@ onUnmounted(() => {
   }
 }
 
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(30px, -40px) scale(1.15);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(-15px, 30px) scale(0.9);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(20px, 15px) scale(1.1);
+    opacity: 0.7;
+  }
+}
+
 /* 星星粒子 */
 .stars {
   position: absolute;
@@ -792,6 +824,99 @@ onUnmounted(() => {
     opacity: 1;
     transform: scale(1.2);
   }
+}
+
+/* === 相册漂浮光斑 === */
+.album-floating-orbs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.album-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(30px);
+  opacity: 0.6;
+  animation: orbFloat 10s ease-in-out infinite;
+}
+
+.album-orb-1 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.8) 0%, transparent 70%);
+  top: -120px;
+  left: -80px;
+  animation-delay: 0s;
+}
+
+.album-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.75) 0%, transparent 70%);
+  bottom: -100px;
+  right: -80px;
+  animation-delay: -2s;
+}
+
+.album-orb-3 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.7) 0%, transparent 70%);
+  top: 15%;
+  right: 5%;
+  animation-delay: -4s;
+}
+
+.album-orb-4 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(147, 197, 253, 0.75) 0%, transparent 70%);
+  bottom: 25%;
+  left: 0%;
+  animation-delay: -6s;
+}
+
+.album-orb-5 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(196, 181, 253, 0.7) 0%, transparent 70%);
+  top: 45%;
+  left: 45%;
+  animation-delay: -3s;
+}
+
+.album-orb-6 {
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(165, 180, 252, 0.75) 0%, transparent 70%);
+  top: 5%;
+  left: 25%;
+  animation-delay: -5s;
+}
+
+/* === 相册星星粒子 === */
+.album-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.album-star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle 3s ease-in-out infinite;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
 }
 
 /* 响应式 */
@@ -823,6 +948,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  z-index: 10;
 }
 
 /* 顶部标题 */

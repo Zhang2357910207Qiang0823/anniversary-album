@@ -174,65 +174,6 @@ const animate = (timestamp) => {
   animationFrame = requestAnimationFrame(animate)
 }
 
-// 绘制极光
-const drawAurora = (ctx, w, h) => {
-  const time = Date.now() / 1000
-  
-  // 极光配置 - 多条光带（降低亮度）
-  const auroraBands = [
-    { y: 0.12, height: 0.22, hue: 160, phase: 0, speed: 0.3 },     // 绿色
-    { y: 0.18, height: 0.18, hue: 200, phase: 1, speed: 0.4 },   // 蓝绿色
-    { y: 0.22, height: 0.16, hue: 240, phase: 2, speed: 0.35 },  // 蓝色
-    { y: 0.15, height: 0.20, hue: 280, phase: 0.5, speed: 0.45 }, // 紫色
-  ]
-  
-  ctx.save()
-  ctx.globalCompositeOperation = 'screen' // 叠加混合模式
-  
-  auroraBands.forEach((band) => {
-    const baseY = h * band.y
-    const bandHeight = h * band.height
-    
-    // 创建渐变（降低透明度）
-    const gradient = ctx.createLinearGradient(0, baseY, 0, baseY + bandHeight)
-    gradient.addColorStop(0, `hsla(${band.hue}, 80%, 60%, 0)`)
-    gradient.addColorStop(0.3, `hsla(${band.hue}, 75%, 55%, 0.06)`)
-    gradient.addColorStop(0.5, `hsla(${band.hue + 20}, 70%, 60%, 0.1)`)
-    gradient.addColorStop(0.7, `hsla(${band.hue}, 75%, 55%, 0.06)`)
-    gradient.addColorStop(1, `hsla(${band.hue}, 80%, 60%, 0)`)
-    
-    // 绘制波浪形极光
-    ctx.beginPath()
-    ctx.moveTo(0, baseY + bandHeight)
-    
-    const waveAmplitude = 25 + Math.sin(time * band.speed) * 15
-    
-    for (let x = 0; x <= w; x += 5) {
-      const waveY = baseY + Math.sin(x * 0.003 + time * band.speed + band.phase) * waveAmplitude
-      ctx.lineTo(x, waveY)
-    }
-    
-    ctx.lineTo(w, baseY + bandHeight)
-    ctx.closePath()
-    ctx.fillStyle = gradient
-    ctx.fill()
-    
-    // 添加发光效果（降低亮度）
-    const glowY = baseY + Math.sin(time * band.speed) * 15
-    const glowGrad = ctx.createRadialGradient(w / 2, glowY, 0, w / 2, glowY, w * 0.5)
-    glowGrad.addColorStop(0, `hsla(${band.hue + 30}, 80%, 65%, 0.04)`)
-    glowGrad.addColorStop(0.5, `hsla(${band.hue}, 70%, 55%, 0.02)`)
-    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)')
-    
-    ctx.beginPath()
-    ctx.ellipse(w / 2, glowY, w * 0.6, bandHeight * 0.6, 0, 0, Math.PI * 2)
-    ctx.fillStyle = glowGrad
-    ctx.fill()
-  })
-  
-  ctx.restore()
-}
-
 // Canvas 绘制函数
 const drawCanvas = () => {
   if (!ctx || !canvas) return
@@ -243,11 +184,10 @@ const drawCanvas = () => {
   const h = canvas.height
 
   // === 绘制渐变背景 ===
-  const bgGradient = ctx.createLinearGradient(0, 0, 0, h)
-  bgGradient.addColorStop(0, '#121830')
-  bgGradient.addColorStop(0.4, '#1a2040')
-  bgGradient.addColorStop(0.7, '#1e2848')
-  bgGradient.addColorStop(1, '#121830')
+  const bgGradient = ctx.createLinearGradient(0, h, w, 0)
+  bgGradient.addColorStop(0, '#0f0f1a')
+  bgGradient.addColorStop(0.4, '#1a1a30')
+  bgGradient.addColorStop(1, '#12122a')
   ctx.fillStyle = bgGradient
   ctx.fillRect(0, 0, w, h)
 
@@ -319,9 +259,6 @@ const drawCanvas = () => {
       }
     }
   }
-
-  // === 绘制极光效果 ===
-  drawAurora(ctx, w, h)
 
   // === 绘制粒子拖尾 ===
   particles.forEach(p => {
@@ -609,6 +546,16 @@ onUnmounted(() => {
     <!-- Canvas: 星空背景 + 纸飞机 + 粒子拖尾 -->
     <canvas id="introCanvas" class="main-canvas" />
 
+    <!-- 漂浮光斑 -->
+    <div class="floating-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="orb orb-4"></div>
+      <div class="orb orb-5"></div>
+      <div class="orb orb-6"></div>
+    </div>
+
     <!-- 日期显示 -->
     <div class="year-display">
       <transition name="year-fade" mode="out-in">
@@ -645,7 +592,7 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, #121830 0%, #1a2040 40%, #1e2848 70%, #121830 100%);
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a30 40%, #12122a 100%);
   z-index: 1000;
   overflow: hidden;
   transition: opacity 0.6s ease;
@@ -747,6 +694,98 @@ onUnmounted(() => {
 
 .intro-title.visible {
   opacity: 1;
+}
+
+/* === 漂浮光斑 === */
+.floating-orbs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(30px);
+  opacity: 0.6;
+  animation: orbFloat 10s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.8) 0%, transparent 70%);
+  top: -120px;
+  left: -80px;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.75) 0%, transparent 70%);
+  bottom: -100px;
+  right: -80px;
+  animation-delay: -2s;
+}
+
+.orb-3 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.7) 0%, transparent 70%);
+  top: 15%;
+  right: 5%;
+  animation-delay: -4s;
+}
+
+.orb-4 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(147, 197, 253, 0.75) 0%, transparent 70%);
+  bottom: 25%;
+  left: 0%;
+  animation-delay: -6s;
+}
+
+.orb-5 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(196, 181, 253, 0.7) 0%, transparent 70%);
+  top: 45%;
+  left: 45%;
+  animation-delay: -3s;
+}
+
+.orb-6 {
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(165, 180, 252, 0.75) 0%, transparent 70%);
+  top: 5%;
+  left: 25%;
+  animation-delay: -5s;
+}
+
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(30px, -40px) scale(1.15);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(-15px, 30px) scale(0.9);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(20px, 15px) scale(1.1);
+    opacity: 0.7;
+  }
 }
 
 .intro-title h1 {
