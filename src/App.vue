@@ -42,26 +42,9 @@ const startExperience = () => {
   showIntro.value = true
 }
 
-// 页面可见性变化时处理音频播放
-const handleVisibilityChange = () => {
-  if (document.visibilityState === 'hidden' && audio.value && isMusicPlaying.value) {
-    // 页面不可见时暂停音乐，记录状态以便恢复
-    audio.value.pause()
-    wasPlayingBeforeHidden = true
-  } else if (document.visibilityState === 'visible' && wasPlayingBeforeHidden && audio.value && isMusicPlaying.value) {
-    // 页面重新可见时恢复播放
-    audio.value.play().catch(() => {})
-    wasPlayingBeforeHidden = false
-  }
-}
-
-let wasPlayingBeforeHidden = false
-
 onMounted(() => {
   // 页面加载时就开始预加载音频
   preloadAudio()
-  // 监听页面可见性变化
-  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 // 生成星星样式
@@ -426,14 +409,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopAutoplay()
-  // 停止音乐并清理
-  if (audio.value) {
-    audio.value.pause()
-    audio.value.src = ''
-    audio.value = null
-  }
-  fadeIntervalId && clearInterval(fadeIntervalId)
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
